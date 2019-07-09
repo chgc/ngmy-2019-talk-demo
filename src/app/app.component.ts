@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,11 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'ngmy-talk-demo';
+  constructor(private http: HttpClient) {
+    this.http
+      .get(
+        'https://en.wikipedia.org//w/api.php?action=query&format=json&origin=*&list=search&srsearch=angular'
+      )
+      .subscribe(data => console.log(data));
+  }
 }
