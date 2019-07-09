@@ -8,6 +8,7 @@ import {
   debounceTime,
   distinctUntilChanged
 } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -17,22 +18,32 @@ import {
 export class AppComponent {
   searchInput = new FormControl();
   data: string[] = [];
+
+  wikiApi = switchMap(keyword =>
+    this.http.get<WikiSearchResult>(
+      'https://en.wikipedia.org//w/api.php?action=query&format=json&origin=*&list=search&srsearch=' +
+        keyword
+    )
+  );
+
+  slowdownRequest = obs =>
+    obs.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    );
+
+  formatData = (obs: Observable<WikiSearchResult>) =>
+    obs.pipe(
+      map(data => data.query.search),
+      map(search => search.map(x => x.title))
+    );
+
   constructor(private http: HttpClient) {
     this.searchInput.valueChanges
       .pipe(
-        debounceTime(500),
-        distinctUntilChanged(),
-        switchMap(keyword =>
-          this.http
-            .get<WikiSearchResult>(
-              'https://en.wikipedia.org//w/api.php?action=query&format=json&origin=*&list=search&srsearch=' +
-                keyword
-            )
-            .pipe(
-              map(data => data.query.search),
-              map(search => search.map(x => x.title))
-            )
-        )
+        this.slowdownRequest,
+        this.wikiApi,
+        this.formatData
       )
       .subscribe(data => {
         this.data = data;
