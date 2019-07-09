@@ -2,7 +2,7 @@
 <label>Search:</label>
 <input type="text" [formControl]="searchInput" />
 <ul>
-  <li *ngFor="let title of data">
+  <li *ngFor="let title of data$ | async">
     {{ title }}
   </li>
 </ul>

@@ -27,7 +27,6 @@ const formatData = R.pipe<WikiSearchResult, Search[], string[]>(
 })
 export class AppComponent {
   searchInput = new FormControl();
-  data: string[] = [];
 
   wikiApi = switchMap(keyword =>
     this.http.get<WikiSearchResult>(
@@ -36,15 +35,11 @@ export class AppComponent {
     )
   );
 
-  constructor(private http: HttpClient) {
-    this.searchInput.valueChanges
-      .pipe(
-        slowdownRequest,
-        this.wikiApi,
-        map(formatData)
-      )
-      .subscribe(data => {
-        this.data = data;
-      });
-  }
+  data$ = this.searchInput.valueChanges.pipe(
+    slowdownRequest,
+    this.wikiApi,
+    map(formatData)
+  );
+
+  constructor(private http: HttpClient) {}
 }
