@@ -1,14 +1,24 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
-import { WikiSearchResult } from './wiki-search.model';
+import { WikiSearchResult, Search } from './wiki-search.model';
 import {
   map,
   switchMap,
   debounceTime,
   distinctUntilChanged
 } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import * as R from 'ramda';
+
+const slowdownRequest = R.pipe(
+  debounceTime(500),
+  distinctUntilChanged()
+);
+
+const formatData = R.pipe<WikiSearchResult, Search[], string[]>(
+  data => data.query.search,
+  R.map(x => x.title)
+);
 
 @Component({
   selector: 'app-root',
@@ -26,24 +36,12 @@ export class AppComponent {
     )
   );
 
-  slowdownRequest = obs =>
-    obs.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
-    );
-
-  formatData = (obs: Observable<WikiSearchResult>) =>
-    obs.pipe(
-      map(data => data.query.search),
-      map(search => search.map(x => x.title))
-    );
-
   constructor(private http: HttpClient) {
     this.searchInput.valueChanges
       .pipe(
-        this.slowdownRequest,
+        slowdownRequest,
         this.wikiApi,
-        this.formatData
+        map(formatData)
       )
       .subscribe(data => {
         this.data = data;

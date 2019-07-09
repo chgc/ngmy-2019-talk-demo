@@ -4,12 +4,12 @@ export interface WikiSearchResult {
   query: Query;
 }
 
-interface Query {
+export interface Query {
   searchinfo: Searchinfo;
   search: Search[];
 }
 
-interface Search {
+export interface Search {
   ns: number;
   title: string;
   pageid: number;
