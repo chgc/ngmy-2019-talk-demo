@@ -9,6 +9,7 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  data: string[] = [];
   constructor(private http: HttpClient) {
     this.http
       .get<WikiSearchResult>(
@@ -18,6 +19,8 @@ export class AppComponent {
         map(data => data.query.search),
         map(search => search.map(x => x.title))
       )
-      .subscribe(data => console.log(data));
+      .subscribe(data => {
+        this.data = data;
+      });
   }
 }
