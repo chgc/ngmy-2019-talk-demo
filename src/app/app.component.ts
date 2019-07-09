@@ -2,7 +2,12 @@ import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
 import { WikiSearchResult } from './wiki-search.model';
-import { map, switchMap } from 'rxjs/operators';
+import {
+  map,
+  switchMap,
+  debounceTime,
+  distinctUntilChanged
+} from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +20,8 @@ export class AppComponent {
   constructor(private http: HttpClient) {
     this.searchInput.valueChanges
       .pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
         switchMap(keyword =>
           this.http
             .get<WikiSearchResult>(
